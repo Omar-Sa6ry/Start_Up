@@ -9,9 +9,12 @@ type User {
   firstName: String!
   lastName: String!
   fullName: String!
-  avatar: String
+  headline: String!
   phone: String!
+  whatsapp: String!
+  nationalId: String!
   email: String!
+  avatar: String
 }
 
 """
@@ -32,6 +35,12 @@ type AuthResponse {
   data: AuthOutPut
 }
 
+type PaginationInfo {
+  totalPages: Int!
+  currentPage: Int!
+  totalItems: Int!
+}
+
 type UserResponse {
   message: String
   success: Boolean
@@ -40,60 +49,58 @@ type UserResponse {
   data: User
 }
 
-type TicketExpired {
-  id: String!
-  seatId: String!
-  message: String!
-}
-
-type TicketExpiredResponsee {
+type UsersResponse {
   message: String
   success: Boolean
   timeStamp: String
   statusCode: Float
-  data: TicketExpired
-}
-
-type NotifySubscription {
-  userId: String!
-  message: String!
-}
-
-type UpdateFlightSubscription {
-  userId: String!
-  message: String!
+  items: [User!]
+  pagination: PaginationInfo
 }
 
 type Query {
   sayHello: String!
-  getUserById(id: String!): UserResponse!
-  getUserByEmail(email: String!): UserResponse!
-  deleteUser: UserResponse!
+  getUserById(id: UserIdInput!): UserResponse!
+  getUserByEmail(email: EmailInput!): UserResponse!
+  getUsers(page: Int, limit: Int): UsersResponse!
+  deleteUser(id: UserIdInput!): UserResponse!
+}
+
+input UserIdInput {
+  UserId: String!
+}
+
+input EmailInput {
+  email: String!
 }
 
 type Mutation {
-  register(fcmToken: String!, createUserDto: CreateUserDto!, avatar: CreateImagDto): AuthResponse!
-  login(fcmToken: String!, loginDto: LoginDto!): AuthResponse!
+  register(createUserDto: CreateUserDto!): AuthResponse!
+  login(loginDto: LoginDto!): AuthResponse!
   forgotPassword: AuthResponse!
   resetPassword(resetPasswordDto: ResetPasswordDto!): UserResponse!
   changePassword(changePasswordDto: ChangePasswordDto!): UserResponse!
-  logout: Boolean!
   updateUser(updateUserDto: UpdateUserDto!): UserResponse!
-  UpdateUserRole(email: String!): String!
+  UpdateUserRoleToAdmin(id: UserIdInput!): UserResponse!
 }
 
 input CreateUserDto {
   firstName: String!
   lastName: String!
+  headline: String!
   email: String!
   password: String!
   phone: String!
+  whatsapp: String!
+  nationalId: String!
+  fcmToken: String!
+  image: CreateImagDto
 }
 
 input CreateImagDto {
   name: String
   breed: String
-  image: Upload!
+  image: Upload
 }
 
 """The `Upload` scalar type represents a file upload."""
@@ -102,6 +109,7 @@ scalar Upload
 input LoginDto {
   email: String!
   password: String!
+  fcmToken: String!
 }
 
 input ResetPasswordDto {
@@ -118,12 +126,6 @@ input UpdateUserDto {
   firstName: String
   lastName: String
   avatar: CreateImagDto
-  email: String
   phone: String
-}
-
-type Subscription {
-  ticketExpired: TicketExpiredResponsee!
-  notifyUsers: NotifySubscription!
-  updateFlight: UpdateFlightSubscription!
+  whatsapp: String
 }

@@ -1,12 +1,15 @@
 mutation {
   register(
-    fcmToken: "some-fcm-token"
     createUserDto: {
       firstName: "Omar"
       lastName: "Sabry"
-      email: "omar@gmail.com"
-      password: "123456789"
+      email: "omarahmedsabry05@gmail.com"
+      nationalId:"30839702489134"
+      password: "O123456789m-"
       phone: "+201234567890"
+      whatsapp: "+201234567890"
+      fcmToken: "some-fcm-token"
+      headline:"admin"   
     }
   ) {
     success
@@ -18,16 +21,21 @@ mutation {
         lastName
         email
         phone
+        whatsapp
       }
       token
     }
   }
 }
 
+
 mutation {
   login(
-    fcmToken: "some-fcm-token"
-    loginDto: { email: "omar@gmail.com", password: "123456789" }
+    loginDto: {
+      fcmToken: "some-fcm-token"
+      email: "omarahmedsabry05@gmail.com"
+      password: "O123456789m-"
+    }
   ) {
     success
     message
@@ -37,15 +45,18 @@ mutation {
         firstName
         lastName
         email
+        phone
+        whatsapp
       }
       token
     }
   }
 }
 
+
 mutation {
   changePassword(
-    changePasswordDto: { password: "123456789", newPassword: "newPassword456" }
+    changePasswordDto: { password: "O123456789m-", newPassword: "O12345hgtehight-" }
   ) {
     success
     message
@@ -65,10 +76,17 @@ mutation {
 }
 
 mutation {
+  forgotPassword {
+    statusCode
+    message
+  }
+}
+
+mutation {
   resetPassword(
     resetPasswordDto: {
-      token: "f67064cbf31f5db1d84f3c5dd4b0eeadcf881493bda44b1a3a564078599f2214"
-      password: "1234567890"
+      token: "31a68f136bf4de00617d17908565018a82053362dd88b0244abd5936ac12a923"
+      password: "O12345hgtehight-"
     }
   ) {
     message

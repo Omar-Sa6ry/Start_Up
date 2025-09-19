@@ -1,10 +1,13 @@
+// import * as bodyParser from 'body-parser';
 import * as graphqlUploadExpress from 'graphql-upload/graphqlUploadExpress.js';
-import * as bodyParser from 'body-parser';
 import { json } from 'express';
 import { DataSource } from 'typeorm';
 import { NestFactory, Reflector } from '@nestjs/core';
+import { I18nValidationException } from 'nestjs-i18n';
 import { AppModule } from './app.module';
-import { GeneralResponseInterceptor } from './common/interceptor/generalResponse.interceptor';
+import { initializeTransactionalContext } from 'typeorm-transactional';
+import { GeneralResponseInterceptor } from './common/interceptors/generalResponse.interceptor';
+import { SqlInjectionInterceptor } from './common/interceptors/sqlInjection.interceptor';
 import {
   BadRequestException,
   ClassSerializerInterceptor,
@@ -13,16 +16,29 @@ import {
 
 async function bootstrap() {
   try {
+    initializeTransactionalContext();
+
     const app = await NestFactory.create(AppModule);
     app.enableCors();
     app.useGlobalPipes(new ValidationPipe());
-    app.useGlobalInterceptors(new GeneralResponseInterceptor());
     app.use(graphqlUploadExpress({ maxFileSize: 1000000, maxFiles: 1 }));
     app.useGlobalInterceptors(
       new ClassSerializerInterceptor(app.get(Reflector)),
+      new SqlInjectionInterceptor(),
+      new GeneralResponseInterceptor(),
+      new ClassSerializerInterceptor(app.get(Reflector)),
     );
 
-    app.use('/stripe/webhook', bodyParser.raw({ type: 'application/json' }));
+    app.useGlobalPipes(
+      new ValidationPipe({
+        transform: true,
+        whitelist: true,
+        stopAtFirstError: true,
+        exceptionFactory: (errors) => new I18nValidationException(errors),
+      }),
+    );
+
+    // app.use('/google/callback', bodyParser.raw({ type: 'application/json' }));
     app.use(json());
 
     const dataSource = app.get(DataSource);

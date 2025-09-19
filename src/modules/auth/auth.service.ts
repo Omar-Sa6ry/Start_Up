@@ -1,254 +1,144 @@
-import {
-  Injectable,
-  BadRequestException,
-  UnauthorizedException,
-} from '@nestjs/common';
-import { InjectDataSource } from '@nestjs/typeorm';
-import { DataSource, MoreThan } from 'typeorm';
-import { randomBytes } from 'crypto';
-import { UserService } from '../users/users.service';
-import { GenerateToken } from './jwt/jwt.service';
-import { User } from '../users/entity/user.entity';
-import { HashPassword } from './utils/hashPassword';
-import { ChangePasswordDto } from './inputs/ChangePassword.dto';
-import { ResetPasswordDto } from './inputs/ResetPassword.dto';
-import { LoginDto } from './inputs/Login.dto';
-import { ComparePassword } from './utils/comparePassword';
+import { I18nService } from 'nestjs-i18n';
+import { UserService } from 'src/modules/users/users.service';
+import { BadRequestException, Injectable } from '@nestjs/common';
+import { User } from 'src/modules/users/entity/user.entity';
+import { InjectRepository } from '@nestjs/typeorm';
+import { RedisService } from 'src/common/redis/redis.service';
+import { AuthResponse } from './dto/AuthRes.dto';
+import { MoreThan, Repository } from 'typeorm';
 import { SendEmailService } from 'src/common/queues/email/sendemail.service';
 import { Role } from 'src/common/constant/enum.constant';
-import { CreateImagDto } from 'src/common/upload/dtos/createImage.dto';
-import { RedisService } from 'src/common/redis/redis.service';
-import { CreateUserDto } from './inputs/CreateUserData.dto';
-import { UploadService } from '../../common/upload/upload.service';
-import { I18nService } from 'nestjs-i18n';
-import { WebSocketMessageGateway } from 'src/common/websocket/websocket.gateway';
-import { UserInputResponse } from '../users/inputs/User.input';
-import { AuthResponse } from './dto/AuthRes.dto';
+import { PasswordResetLinkBuilder } from './builder/PasswordResetLink.builder';
+import { UserResponse } from '../users/dto/UserResponse.dto';
+import { ResetPasswordDto } from './inputs/ResetPassword.dto';
+import { PasswordServiceAdapter } from './adapter/password.adapter';
+import { ChangePasswordDto } from './inputs/ChangePassword.dto';
+import { IPasswordStrategy } from './interfaces/IPassword.interface';
+import { SendResetPasswordEmailCommand } from './command/auth.command';
+import {
+  CompletedResetState,
+  InitialResetState,
+  PasswordResetContext,
+} from './state/auth.state';
 
 @Injectable()
 export class AuthService {
+  private passwordStrategy: IPasswordStrategy;
+
   constructor(
     private readonly i18n: I18nService,
-    private userService: UserService,
-    private generateToken: GenerateToken,
+    private readonly userService: UserService,
     private readonly redisService: RedisService,
-    private readonly uploadService: UploadService,
-    private readonly sendEmailService: SendEmailService,
-    private readonly websocketGateway: WebSocketMessageGateway,
-    @InjectDataSource() private readonly dataSource: DataSource,
-  ) {}
-
-  async register(
-    fcmToken: string,
-    createUserDto: CreateUserDto,
-    avatar?: CreateImagDto,
-  ): Promise<AuthResponse> {
-    const { email } = createUserDto;
-
-    const queryRunner = this.dataSource.createQueryRunner();
-    await queryRunner.connect();
-    await queryRunner.startTransaction();
-
-    try {
-      const password = await HashPassword(createUserDto.password);
-      const user = queryRunner.manager.create(User, {
-        ...createUserDto,
-        password,
-      });
-
-      if (avatar) {
-        const filename = await this.uploadService.uploadImage(avatar);
-        if (typeof filename === 'string') {
-          user.avatar = filename;
-        }
-      }
-
-      user.fcmToken = fcmToken;
-      await queryRunner.manager.save(user);
-
-      const token = await this.generateToken.jwt(user.email, user.id);
-      await queryRunner.commitTransaction();
-
-      const result: AuthResponse = {
-        data: { user, token },
-        statusCode: 201,
-        message: await this.i18n.t('user.CREATED'),
-      };
-
-      await this.redisService.set(`user:${user.id}`, user);
-      await this.redisService.set(`auth:${user.id}`, result);
-
-      this.websocketGateway.broadcast('userCreated', { userId: user.id, user });
-
-      this.sendEmailService.sendEmail(
-        email,
-        'Register in App',
-        'You registered successfully in the App',
-      );
-
-      return result;
-    } catch (error) {
-      await queryRunner.rollbackTransaction();
-      throw error;
-    } finally {
-      await queryRunner.release();
-    }
-  }
-
-  async login(fcmToken: string, loginDto: LoginDto): Promise<AuthResponse> {
-    const { email, password } = loginDto;
-
-    const user = await this.dataSource
-      .getRepository(User)
-      .findOne({ where: { email } });
-    if (!user)
-      throw new BadRequestException(await this.i18n.t('user.EMAIL_WRONG'));
-
-    await ComparePassword(password, user.password);
-    const token = await this.generateToken.jwt(user.email, user.id);
-
-    user.fcmToken = fcmToken;
-    await this.dataSource.getRepository(User).save(user);
-
-    const result: AuthResponse = {
-      data: { user, token },
-      statusCode: 201,
-      message: await this.i18n.t('user.LOGIN'),
-    };
-
-    await this.redisService.set(`user:${user.id}`, user);
-    await this.redisService.set(`auth:${user.id}`, result);
-
-    return result;
+    private readonly emailService: SendEmailService,
+    @InjectRepository(User) private readonly userRepo: Repository<User>,
+  ) {
+    this.passwordStrategy = new PasswordServiceAdapter();
   }
 
   async forgotPassword(email: string): Promise<AuthResponse> {
-    const lowerEmail = email.toLowerCase();
-    const user = await (await this.userService.findByEmail(lowerEmail))?.data;
-    if (!(user instanceof User))
-      throw new BadRequestException(await this.i18n.t('user.EMAIL_WRONG'));
+    const user = await this.validateUserForPasswordReset(email);
 
-    if ([Role.MANAGER, Role.ADMIN].includes(user.role))
-      throw new BadRequestException(await this.i18n.t('user.NOT_ADMIN'));
+    const builder = new PasswordResetLinkBuilder();
+    const link = builder.build();
+    const token = builder.getToken();
 
-    const token = randomBytes(32).toString('hex');
-    user.resetToken = token;
-    user.resetTokenExpiry = new Date(Date.now() + 15 * 60 * 1000); // 15 min
-    const link = `http://localhost:3000/grapql/reset-password?token=${token}`;
-    await this.dataSource.getRepository(User).save(user);
+    const resetContext = new PasswordResetContext(new InitialResetState());
+    await resetContext.execute(user, token);
+    await this.userRepo.save(user);
 
-    this.sendEmailService.sendEmail(
-      lowerEmail,
-      'Forgot Password',
-      `Click here to reset your password: ${link}`,
+    const emailCommand = new SendResetPasswordEmailCommand(
+      this.emailService,
+      email,
+      link,
     );
+    emailCommand.execute();
 
     return { message: await this.i18n.t('user.SEND_MSG'), data: null };
   }
 
   async resetPassword(
-    resetPassword: ResetPasswordDto,
-  ): Promise<UserInputResponse> {
-    const { password, token } = resetPassword;
+    resetPasswordDto: ResetPasswordDto,
+  ): Promise<UserResponse> {
+    const user = await this.validateResetToken(resetPasswordDto.token);
+    user.password = await this.passwordStrategy.hash(resetPasswordDto.password);
 
-    const queryRunner = this.dataSource.createQueryRunner();
-    await queryRunner.connect();
-    await queryRunner.startTransaction();
+    const resetContext = new PasswordResetContext(new CompletedResetState());
+    await resetContext.execute(user);
 
-    try {
-      const user = await queryRunner.manager.findOne(User, {
-        where: {
-          resetToken: token,
-          resetTokenExpiry: MoreThan(new Date()),
-        },
-      });
+    await this.userRepo.save(user);
 
-      if (!user)
-        throw new BadRequestException(await this.i18n.t('user.NOT_FOUND'));
+    this.redisService.set(`user:${user.id}`, user);
 
-      user.password = await HashPassword(password);
-      await queryRunner.manager.save(user);
-
-      await this.redisService.set(`user:${user.id}`, user);
-      await queryRunner.commitTransaction();
-
-      return { message: await this.i18n.t('user.UPDATE_PASSWORD'), data: user };
-    } catch (error) {
-      await queryRunner.rollbackTransaction();
-      throw error;
-    } finally {
-      await queryRunner.release();
-    }
+    return {
+      message: await this.i18n.t('user.UPDATE_PASSWORD'),
+      data: user,
+    };
   }
 
   async changePassword(
     id: string,
-    changePassword: ChangePasswordDto,
-  ): Promise<UserInputResponse> {
-    const { password, newPassword } = changePassword;
-
-    if (password === newPassword)
+    changePasswordDto: ChangePasswordDto,
+  ): Promise<UserResponse> {
+    if (changePasswordDto.password === changePasswordDto.newPassword)
       throw new BadRequestException(
         await this.i18n.t('user.LOGISANE_PASSWORD'),
       );
 
-    const queryRunner = this.dataSource.createQueryRunner();
-    await queryRunner.connect();
-    await queryRunner.startTransaction();
+    const user = await this.validateUserForPasswordChange(
+      id,
+      changePasswordDto.password,
+    );
 
-    try {
-      const user = await (await this.userService.findById(id))?.data;
-      if (!user)
-        throw new BadRequestException(await this.i18n.t('user.EMAIL_WRONG'));
+    user.password = await this.passwordStrategy.hash(
+      changePasswordDto.newPassword,
+    );
+    await this.userRepo.save(user);
 
-      const isMatch = await ComparePassword(password, user.password);
-      if (!isMatch)
-        throw new BadRequestException(
-          await this.i18n.t('user.OLD_IS_EQUAL_NEW'),
-        );
-
-      user.password = await HashPassword(newPassword);
-      await queryRunner.manager.save(user);
-
-      await queryRunner.commitTransaction();
-      return { message: await this.i18n.t('user.UPDATE_PASSWORD'), data: user };
-    } catch (error) {
-      await queryRunner.rollbackTransaction();
-      throw error;
-    } finally {
-      await queryRunner.release();
-    }
+    return {
+      message: await this.i18n.t('user.UPDATE_PASSWORD'),
+      data: user,
+    };
   }
 
-  private async roleBasedLogin(
-    fcmToken: string,
-    loginDto: LoginDto,
-    role: Role,
-  ): Promise<AuthResponse> {
-    const { email, password } = loginDto;
-    const user = await this.userService.findByEmail(email.toLowerCase());
+  // ====================== Private helper methods =====================
 
-    if (!(user instanceof User))
+  private async validateUserForPasswordReset(email: string): Promise<User> {
+    const user = await this.userService.findByEmail(email);
+
+    if ([Role.ADMIN].includes(user.data.role))
+      throw new BadRequestException(await this.i18n.t('user.NOT_ADMIN'));
+
+    return user.data;
+  }
+
+  private async validateResetToken(token: string): Promise<User> {
+    const user = await this.userRepo.findOne({
+      where: {
+        resetToken: token,
+        resetTokenExpiry: MoreThan(new Date()),
+      },
+    });
+
+    if (!user)
+      throw new BadRequestException(await this.i18n.t('user.NOT_FOUND'));
+    return user;
+  }
+
+  private async validateUserForPasswordChange(
+    id: string,
+    currentPassword: string,
+  ): Promise<User> {
+    const user = await this.userService.findById(id);
+    if (!user)
       throw new BadRequestException(await this.i18n.t('user.EMAIL_WRONG'));
 
-    if (user.role !== role)
-      throw new UnauthorizedException(await this.i18n.t('user.NOT_ADMIN'));
+    const isMatch = await this.passwordStrategy.compare(
+      currentPassword,
+      user.data.password,
+    );
+    if (!isMatch)
+      throw new BadRequestException(await this.i18n.t('user.OLD_IS_EQUAL_NEW'));
 
-    await ComparePassword(password, user.password);
-    const token = await this.generateToken.jwt(user.email, user.id);
-
-    user.fcmToken = fcmToken;
-    await this.dataSource.getRepository(User).save(user);
-
-    const result: AuthResponse = {
-      data: { user, token },
-      statusCode: 201,
-      message: await this.i18n.t('user.LOGIN'),
-    };
-
-    await this.redisService.set(`user:${user.id}`, user);
-    await this.redisService.set(`auth:${user.id}`, result);
-
-    return result;
+    return user.data;
   }
 }

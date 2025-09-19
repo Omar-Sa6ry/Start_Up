@@ -1,16 +1,17 @@
 import { Field, InputType } from '@nestjs/graphql';
-import { Transform } from 'class-transformer';
-import { IsEmail, Validate } from 'class-validator';
-import { IsEmailConstraint } from 'src/common/constant/validEmail';
+import { IsString } from 'class-validator';
+import { EmailField } from 'src/common/decorator/validation/EmailField.decorator';
+import { PasswordField } from 'src/common/decorator/validation/PasswordField.decorator';
 
 @InputType()
 export class LoginDto {
-  @Field()
-  @IsEmail()
-  @Validate(IsEmailConstraint)
-  @Transform(({ value }) => value.toLowerCase())
+  @EmailField()
   email: string;
 
-  @Field()
+  @PasswordField()
   password: string;
+
+  @Field()
+  @IsString()
+  fcmToken: string;
 }

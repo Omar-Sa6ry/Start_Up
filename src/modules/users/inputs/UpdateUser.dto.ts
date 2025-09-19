@@ -1,40 +1,28 @@
 import { Field, InputType } from '@nestjs/graphql';
 import { CreateImagDto } from 'src/common/upload/dtos/createImage.dto';
-import { Transform } from 'class-transformer';
-import { IsEmailConstraint } from 'src/common/constant/validEmail';
-import {
-  IsEmail,
-  IsString,
-  IsPhoneNumber,
-  IsOptional,
-  Validate,
-} from 'class-validator';
+import { IsOptional } from 'class-validator';
+import { CapitalTextField } from 'src/common/decorator/validation/CapitalField.decorator';
+import { PhoneField } from 'src/common/decorator/validation/PhoneField.decorator';
 
 @InputType()
 export class UpdateUserDto {
-  @Field({ nullable: true })
   @IsOptional()
-  @IsString()
-  firstName: string;
+  @CapitalTextField('First name', 100, true)
+  firstName?: string;
 
-  @Field({ nullable: true })
   @IsOptional()
-  @IsString()
-  lastName: string;
+  @CapitalTextField('Last name', 100, true)
+  lastName?: string;
 
-  @Field({ nullable: true })
   @IsOptional()
+  @Field(() => CreateImagDto, { nullable: true })
   avatar?: CreateImagDto;
 
-  @Field({ nullable: true })
   @IsOptional()
-  @IsEmail()
-  @Validate(IsEmailConstraint)
-  @Transform(({ value }) => value.toLowerCase())
-  email?: string;
-
-  @Field({ nullable: true })
-  @IsOptional()
-  @IsPhoneNumber('EG')
+  @PhoneField(true)
   phone?: string;
+
+  @IsOptional()
+  @PhoneField(true)
+  whatsapp?: string;
 }

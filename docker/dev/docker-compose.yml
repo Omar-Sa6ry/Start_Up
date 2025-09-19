@@ -1,0 +1,45 @@
+services:
+  app:
+    build:
+      context: ../..
+      dockerfile: docker/dev/Dockerfile
+    container_name: start_up-dev
+    restart: always
+    expose:
+      - "4002"
+    depends_on:
+      - postgres
+      - redis
+    env_file:
+      - ../../.env.development
+    networks:
+      - app_network
+
+  redis:
+    image: redis:alpine
+    container_name: start_up-redis-dev
+    restart: always
+    ports:
+      - "6379:6379"
+    networks:
+      - app_network
+
+  postgres:
+    image: postgres:15
+    container_name: start_up-postgres
+    restart: always
+    ports:
+      - "5432:5432"
+    env_file:
+      - ../../.env
+      - ../../.env.development
+    volumes:
+      - postgres_data_prod:/var/lib/postgresql/data
+    networks:
+      - app_network
+
+volumes:
+  postgres_data_prod:
+
+networks:
+  app_network:

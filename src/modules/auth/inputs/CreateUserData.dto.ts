@@ -1,37 +1,42 @@
 import { Field, InputType } from '@nestjs/graphql';
-import { PasswordValidator } from 'src/common/constant/messages.constant';
-import {
-  IsEmail,
-  IsString,
-  IsPhoneNumber,
-  Length,
-  Validate,
-} from 'class-validator';
-import { Transform } from 'class-transformer';
-import { IsEmailConstraint } from 'src/common/constant/validEmail';
+import { IsString } from 'class-validator';
+import { CapitalTextField } from 'src/common/decorator/validation/CapitalField.decorator';
+import { EmailField } from 'src/common/decorator/validation/EmailField.decorator';
+import { NationalIdField } from 'src/common/decorator/validation/nationalId.decorator';
+import { PasswordField } from 'src/common/decorator/validation/PasswordField.decorator';
+import { PhoneField } from 'src/common/decorator/validation/PhoneField.decorator';
+import { CreateImagDto } from 'src/common/upload/dtos/createImage.dto';
 
 @InputType()
 export class CreateUserDto {
-  @Field()
-  @IsString()
+  @CapitalTextField('First name')
   firstName: string;
 
-  @Field()
-  @IsString()
+  @CapitalTextField('Last name')
   lastName: string;
 
-  @Field()
-  @IsEmail()
-  @Validate(IsEmailConstraint)
-  @Transform(({ value }) => value.toLowerCase())
+  @CapitalTextField('Headline')
+  headline: string;
+
+  @EmailField()
   email: string;
+
+  @PasswordField()
+  password: string;
+
+  @PhoneField()
+  phone: string;
+
+  @PhoneField()
+  whatsapp: string;
+
+  @NationalIdField()
+  nationalId: string;
 
   @Field()
   @IsString()
-  @Length(8, 16, { message: PasswordValidator })
-  password: string;
+  fcmToken: string;
 
-  @Field()
-  @IsPhoneNumber('EG')
-  phone: string;
+  @Field(() => CreateImagDto, { nullable: true })
+  image: CreateImagDto;
 }

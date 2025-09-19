@@ -1,0 +1,49 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: ../..
+      dockerfile: docker/prod/Dockerfile
+    container_name: start_up-prod
+    restart: always
+    expose:
+      - "4002"
+    depends_on:
+      - postgres
+      - redis
+    env_file:
+      - ../../.env.production
+    networks:
+      - app_network
+
+  redis:
+    image: redis:alpine
+    container_name: start_up-redis-prod
+    restart: always
+    ports:
+      - "6379:6379"
+    networks:
+      - app_network
+
+  postgres:
+    image: postgres:15
+    container_name: start_up-db-prod
+    restart: always
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: prod_user
+      POSTGRES_PASSWORD: prod_pass
+      POSTGRES_DB: start_up
+    volumes:
+      - postgres_data_prod:/var/lib/postgresql/data
+    networks:
+      - app_network
+
+volumes:
+  postgres_data_prod:
+
+networks:
+  app_network:
+  
