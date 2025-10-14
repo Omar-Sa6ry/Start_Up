@@ -1,9 +1,8 @@
 import { Field, ObjectType } from '@nestjs/graphql';
 import { User } from '../entity/user.entity';
 import { Expose } from 'class-transformer';
-import { BaseResponse } from 'src/common/bases/BaseResponse';
 import { IsOptional } from 'class-validator';
-import { PaginationInfo } from 'src/common/dtos/pagintion';
+import { BaseResponse, PaginationInfo } from '@bts-soft/core';
 
 @ObjectType()
 export class UserResponse extends BaseResponse {

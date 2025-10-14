@@ -1,11 +1,13 @@
+import {
+  BaseEntity,
+  CapitalTextField,
+  EmailField,
+  NationalIdField,
+  PhoneField,
+} from '@bts-soft/core';
 import { ObjectType, Field } from '@nestjs/graphql';
 import { Exclude } from 'class-transformer';
-import { BaseEntity } from 'src/common/bases/BaseEntity';
 import { Role } from 'src/common/constant/enum.constant';
-import { CapitalTextField } from 'src/common/decorator/validation/CapitalField.decorator';
-import { EmailField } from 'src/common/decorator/validation/EmailField.decorator';
-import { NationalIdField } from 'src/common/decorator/validation/nationalId.decorator';
-import { PhoneField } from 'src/common/decorator/validation/PhoneField.decorator';
 import {
   Entity,
   Column,

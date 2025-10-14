@@ -1,11 +1,13 @@
+import {
+  EmailField,
+  PasswordField,
+  CapitalTextField,
+  PhoneField,
+  NationalIdField,
+  CreateImageDto,
+} from '@bts-soft/core';
 import { Field, InputType } from '@nestjs/graphql';
 import { IsString } from 'class-validator';
-import { CapitalTextField } from 'src/common/decorator/validation/CapitalField.decorator';
-import { EmailField } from 'src/common/decorator/validation/EmailField.decorator';
-import { NationalIdField } from 'src/common/decorator/validation/nationalId.decorator';
-import { PasswordField } from 'src/common/decorator/validation/PasswordField.decorator';
-import { PhoneField } from 'src/common/decorator/validation/PhoneField.decorator';
-import { CreateImagDto } from 'src/common/upload/dtos/createImage.dto';
 
 @InputType()
 export class CreateUserDto {
@@ -37,6 +39,6 @@ export class CreateUserDto {
   @IsString()
   fcmToken: string;
 
-  @Field(() => CreateImagDto, { nullable: true })
-  image: CreateImagDto;
+  @Field(() => CreateImageDto, { nullable: true })
+  image: CreateImageDto;
 }

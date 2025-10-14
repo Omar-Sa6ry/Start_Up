@@ -1,5 +1,5 @@
 {
-  "name": "course-platform",
+  "name": "start-up",
   "version": "0.0.1",
   "description": "",
   "author": "",
@@ -21,9 +21,11 @@
   },
   "dependencies": {
     "@apollo/server": "^4.11.3",
+    "@as-integrations/express5": "^1.1.2",
+    "@bts-soft/core": "^1.7.3",
     "@nestjs-modules/mailer": "^2.0.2",
     "@nestjs/apollo": "^13.1.0",
-    "@nestjs/bullmq": "^11.0.2",
+    "@nestjs/bullmq": "^11.0.4",
     "@nestjs/cache-manager": "^3.0.0",
     "@nestjs/common": "^10.0.0",
     "@nestjs/config": "^4.0.0",
@@ -37,7 +39,7 @@
     "@nestjs/typeorm": "^11.0.0",
     "apollo-server-express": "^3.13.0",
     "bcrypt": "^5.1.1",
-    "bullmq": "^5.40.2",
+    "bullmq": "^5.61.0",
     "cache-manager": "^6.4.0",
     "cache-manager-ioredis": "^2.1.0",
     "cache-manager-redis-store": "^3.0.1",

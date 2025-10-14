@@ -1,6 +1,5 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { I18nService } from 'nestjs-i18n';
-import { RedisService } from 'src/common/redis/redis.service';
 import { UserService } from 'src/modules/users/users.service';
 import { GenerateTokenFactory } from '../jwt/jwt.service';
 import { User } from 'src/modules/users/entity/user.entity';
@@ -9,15 +8,14 @@ import { LoginDto } from '../inputs/Login.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreateUserDto } from '../inputs/CreateUserData.dto';
-import { CreateImagDto } from 'src/common/upload/dtos/createImage.dto';
 import { SendWelcomeEmailCommand } from '../command/auth.command';
 import { SendEmailService } from 'src/common/queues/email/sendemail.service';
-import { UploadService } from 'src/common/upload/upload.service';
 import { Role } from 'src/common/constant/enum.constant';
 import { PasswordValidator, RoleValidator } from '../chain/auth.chain';
 import { PasswordServiceAdapter } from '../adapter/password.adapter';
 import { UserProxy } from 'src/modules/users/proxy/user.proxy';
 import { Transactional } from 'typeorm-transactional';
+import { CreateImageDto, RedisService, UploadService } from '@bts-soft/core';
 
 @Injectable()
 export class AuthServiceFacade {
@@ -150,7 +148,7 @@ export class AuthServiceFacade {
     return user;
   }
 
-  private async handleAvatarUpload(avatar: CreateImagDto): Promise<string> {
+  private async handleAvatarUpload(avatar: CreateImageDto): Promise<string> {
     const filename = await this.uploadService.uploadImage(avatar);
     return typeof filename === 'string' ? filename : '';
   }

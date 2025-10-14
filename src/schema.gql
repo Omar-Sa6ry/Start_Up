@@ -2,9 +2,26 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
+"""Metadata describing pagination details"""
+type PaginationInfo {
+  """Total number of pages"""
+  totalPages: Int!
+
+  """Current page number"""
+  currentPage: Int!
+
+  """Total number of records/items"""
+  totalItems: Int!
+}
+
 type User {
+  """Unique identifier for the entity"""
   id: ID!
+
+  """Record creation date"""
   createdAt: DateTime!
+
+  """Record last update date"""
   updatedAt: DateTime!
   firstName: String!
   lastName: String!
@@ -33,12 +50,6 @@ type AuthResponse {
   timeStamp: String
   statusCode: Float
   data: AuthOutPut
-}
-
-type PaginationInfo {
-  totalPages: Int!
-  currentPage: Int!
-  totalItems: Int!
 }
 
 type UserResponse {
@@ -94,10 +105,10 @@ input CreateUserDto {
   whatsapp: String!
   nationalId: String!
   fcmToken: String!
-  image: CreateImagDto
+  image: CreateImageDto
 }
 
-input CreateImagDto {
+input CreateImageDto {
   name: String
   breed: String
   image: Upload
@@ -125,7 +136,7 @@ input ChangePasswordDto {
 input UpdateUserDto {
   firstName: String
   lastName: String
-  avatar: CreateImagDto
+  avatar: CreateImageDto
   phone: String
   whatsapp: String
 }

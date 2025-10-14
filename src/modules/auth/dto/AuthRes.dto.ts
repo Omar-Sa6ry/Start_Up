@@ -1,6 +1,6 @@
+import { BaseResponse } from '@bts-soft/core';
 import { Field, ObjectType } from '@nestjs/graphql';
 import { Expose } from 'class-transformer';
-import { BaseResponse } from 'src/common/bases/BaseResponse';
 import { User } from 'src/modules/users/entity/user.entity';
 
 @ObjectType()

@@ -1,5 +1,5 @@
 import { InputType } from '@nestjs/graphql';
-import { PasswordField } from 'src/common/decorator/validation/PasswordField.decorator';
+import { PasswordField } from '@bts-soft/core';
 
 @InputType()
 export class ChangePasswordDto {

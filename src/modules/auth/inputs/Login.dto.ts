@@ -1,7 +1,6 @@
 import { Field, InputType } from '@nestjs/graphql';
 import { IsString } from 'class-validator';
-import { EmailField } from 'src/common/decorator/validation/EmailField.decorator';
-import { PasswordField } from 'src/common/decorator/validation/PasswordField.decorator';
+import { EmailField, PasswordField } from '@bts-soft/core';
 
 @InputType()
 export class LoginDto {

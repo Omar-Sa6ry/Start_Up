@@ -3,7 +3,6 @@ import { UserService } from 'src/modules/users/users.service';
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { User } from 'src/modules/users/entity/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { RedisService } from 'src/common/redis/redis.service';
 import { AuthResponse } from './dto/AuthRes.dto';
 import { MoreThan, Repository } from 'typeorm';
 import { SendEmailService } from 'src/common/queues/email/sendemail.service';
@@ -20,6 +19,7 @@ import {
   InitialResetState,
   PasswordResetContext,
 } from './state/auth.state';
+import { RedisService } from '@bts-soft/core';
 
 @Injectable()
 export class AuthService {

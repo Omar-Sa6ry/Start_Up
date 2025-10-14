@@ -1,4 +1,4 @@
-import { RedisService } from 'src/common/redis/redis.service';
+import { RedisService } from '@bts-soft/core';
 import { IUserObserver } from '../interfaces/IUserObserver.interface';
 import { User } from 'src/modules/users/entity/user.entity';
 

@@ -1,4 +1,3 @@
-import { RedisService } from 'src/common/redis/redis.service';
 import { UserResponse, UsersResponse } from '../dto/UserResponse.dto';
 import { I18nService } from 'nestjs-i18n';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -6,6 +5,7 @@ import { Repository } from 'typeorm';
 import { User } from 'src/modules/users/entity/user.entity';
 import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { Limit, Page } from 'src/common/constant/messages.constant';
+import { RedisService } from '@bts-soft/core';
 
 export class UserProxy {
   constructor(

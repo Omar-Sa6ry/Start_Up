@@ -2,13 +2,13 @@ import { UserService } from 'src/modules/users/users.service';
 import { Args, Int, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { UpdateUserDto } from './inputs/UpdateUser.dto';
 import { Permission } from 'src/common/constant/enum.constant';
-import { CurrentUserDto } from 'src/common/dtos/currentUser.dto';
-import { CurrentUser } from 'src/common/decorator/currentUser.decorator';
 import { Auth } from 'src/common/decorator/auth.decorator';
 import { UserResponse, UsersResponse } from './dto/UserResponse.dto';
 import { EmailInput, UserIdInput } from './inputs/user.input';
 import { UserFacadeService } from './fascade/user.fascade';
 import { User } from './entity/user.entity';
+import { CurrentUser } from 'src/common/decorator/currentUser.decorator';
+import { CurrentUserDto } from '@bts-soft/core';
 
 @Resolver(() => User)
 export class UserResolver {

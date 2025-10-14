@@ -3,15 +3,14 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { UpdateUserDto } from '../inputs/UpdateUser.dto';
 import { UserResponse } from '../dto/UserResponse.dto';
 import { I18nService } from 'nestjs-i18n';
-import { UploadService } from 'src/common/upload/upload.service';
 import { Repository } from 'typeorm';
 import { User } from '../entity/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UserProxy } from '../proxy/user.proxy';
 import { UserFactory } from '../factory/user.factory';
 import { CacheObserver } from '../observer/user.observer';
-import { RedisService } from 'src/common/redis/redis.service';
 import { UserRoleContext } from '../state/user.state';
+import { RedisService, UploadService } from '@bts-soft/core';
 
 @Injectable()
 export class UserFacadeService {
