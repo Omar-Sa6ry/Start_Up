@@ -11,6 +11,7 @@ export const rolePermissionsMap: Record<Role, Permission[]> = {
     Permission.FORGOT_PASSWORD,
     Permission.LOGOUT,
     Permission.VIEW_USER,
+    Permission.GENERATE_TELEGRAM_TOKEN,
 
     // Category
     Permission.CREATE_CATEGORY,
@@ -31,6 +32,7 @@ export const rolePermissionsMap: Record<Role, Permission[]> = {
     Permission.CHANGE_PASSWORD,
     Permission.FORGOT_PASSWORD,
     Permission.LOGOUT,
+    Permission.GENERATE_TELEGRAM_TOKEN,
 
     // Cart
     Permission.CREATE_CART,

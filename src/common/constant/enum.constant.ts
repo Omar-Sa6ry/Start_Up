@@ -7,6 +7,8 @@ export enum Role {
 export const AllRoles: Role[] = Object.values(Role);
 
 export enum Permission {
+  GENERATE_TELEGRAM_TOKEN="generate telegram token",
+  
   UPDATE_USER = 'update_user',
   DELETE_USER = 'delete_user',
   EDIT_USER_ROLE = 'edit_user_role',

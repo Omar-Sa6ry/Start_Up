@@ -1,3 +1,4 @@
+import * as crypto from 'crypto';
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { I18nService } from 'nestjs-i18n';
 import { UserService } from 'src/modules/users/users.service';
@@ -15,7 +16,14 @@ import { PasswordValidator, RoleValidator } from '../chain/auth.chain';
 import { PasswordServiceAdapter } from '../adapter/password.adapter';
 import { UserProxy } from 'src/modules/users/proxy/user.proxy';
 import { Transactional } from 'typeorm-transactional';
-import { CreateImageDto, RedisService, UploadService } from '@bts-soft/core';
+import {
+  CreateImageDto,
+  TelegramService,
+  RedisService,
+  UploadService,
+  ChannelType,
+  NotificationService,
+} from '@bts-soft/core';
 
 @Injectable()
 export class AuthServiceFacade {
@@ -29,6 +37,8 @@ export class AuthServiceFacade {
     private readonly redisService: RedisService,
     private readonly uploadService: UploadService,
     private readonly emailService: SendEmailService,
+    private readonly telegramService: TelegramService,
+    private readonly notificationService: NotificationService,
     @InjectRepository(User) private readonly userRepo: Repository<User>,
   ) {
     this.proxy = new UserProxy(this.i18n, this.redisService, this.userRepo);
@@ -48,6 +58,21 @@ export class AuthServiceFacade {
       user.email,
     );
     emailCommand.execute();
+
+    const telegramLinkToken = crypto
+      .randomBytes(4)
+      .toString('hex')
+      .toUpperCase();
+
+    this.telegramService.saveTelegramLinkToken(user.id, telegramLinkToken);
+
+    user.telegramLinkToken = telegramLinkToken;
+    await this.userRepo.save(user);
+
+    await this.notificationService.send(ChannelType.TELEGRAM, {
+      recipientId: '123456789',
+      body: 'You login successfully!',
+    });
 
     return {
       data: {

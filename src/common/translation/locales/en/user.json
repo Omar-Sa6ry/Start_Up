@@ -3,6 +3,7 @@
   "LOGIN": "User Lohin successfully",
   "UPDATED": "User updated successfully",
   "DELETED": "User deleted successfully",
+  "TELEGRAM_SAVE":"token saved successfully",
   "NOT_ADMIN": "User not admin",
   "END_EMAIL": "User must be endend by @gmailcom",
   "NOT_FOUND": "User not found",

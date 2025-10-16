@@ -11,7 +11,7 @@ import { GenerateTokenFactory } from './jwt/jwt.service';
 import { AuthServiceFacade } from './fascade/AuthService.facade';
 import { PasswordServiceAdapter } from './adapter/password.adapter';
 import { UserProxy } from '../users/proxy/user.proxy';
-import { RedisModule, UploadModule } from '@bts-soft/core';
+import { RedisModule, TelegramModule, UploadModule } from '@bts-soft/core';
 
 @Module({
   imports: [
@@ -21,6 +21,7 @@ import { RedisModule, UploadModule } from '@bts-soft/core';
     UploadModule,
     EmailModule,
     JwtModule,
+    TelegramModule,
   ],
   providers: [
     AuthResolver,

@@ -75,13 +75,21 @@ export class User extends BaseEntity {
   })
   role: Role;
 
+  @Field({ nullable: true })
+  @Column({ length: 255, nullable: true })
+  avatar?: string;
+
   @Exclude()
   @Column({ nullable: true, unique: true })
   googleId?: string;
 
-  @Field({ nullable: true })
-  @Column({ length: 255, nullable: true })
-  avatar?: string;
+  @Exclude()
+  @Column({ nullable: true })
+  telegramLinkToken?: string;
+
+  @Exclude()
+  @Column({ nullable: true })
+  telegram_chat_id?: string;
 
   @Exclude()
   @Column({ nullable: true })

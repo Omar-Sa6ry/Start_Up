@@ -69,6 +69,14 @@ type UsersResponse {
   pagination: PaginationInfo
 }
 
+type NotificationResponse {
+  message: String
+  success: Boolean
+  timeStamp: String
+  statusCode: Float
+  data: String!
+}
+
 type Query {
   sayHello: String!
   getUserById(id: UserIdInput!): UserResponse!
@@ -93,6 +101,7 @@ type Mutation {
   changePassword(changePasswordDto: ChangePasswordDto!): UserResponse!
   updateUser(updateUserDto: UpdateUserDto!): UserResponse!
   UpdateUserRoleToAdmin(id: UserIdInput!): UserResponse!
+  generateTelegramLinkToken: NotificationResponse!
 }
 
 input CreateUserDto {
