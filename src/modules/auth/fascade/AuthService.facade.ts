@@ -69,10 +69,15 @@ export class AuthServiceFacade {
     user.telegramLinkToken = telegramLinkToken;
     await this.userRepo.save(user);
 
-    this.notificationService.send(ChannelType.WHATSAPP, {
-      recipientId: createUserDto.whatsapp,
-      body: 'You registered successfully in the App',
-    });
+    // this.notificationService.send(ChannelType.WHATSAPP, {
+    //   recipientId: createUserDto.whatsapp,
+    //   body: 'You registered successfully in the App',
+    // });
+
+    // this.notificationService.send(ChannelType.SMS, {
+    //   recipientId: createUserDto.phone,
+    //   body: 'You registered successfully in the App',
+    // });
 
     return {
       data: {
