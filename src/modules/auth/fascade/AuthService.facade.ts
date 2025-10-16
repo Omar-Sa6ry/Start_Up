@@ -22,8 +22,8 @@ import {
   RedisService,
   UploadService,
   ChannelType,
-  NotificationService,
 } from '@bts-soft/core';
+import { NotificationService } from '@bts-soft/notifications';
 
 @Injectable()
 export class AuthServiceFacade {
@@ -77,6 +77,11 @@ export class AuthServiceFacade {
     // this.notificationService.send(ChannelType.SMS, {
     //   recipientId: createUserDto.phone,
     //   body: 'You registered successfully in the App',
+    // });
+
+    // this.notificationService.send(ChannelType.DISCORD, {
+    //   recipientId: 'ignored',
+    //   body: 'new account is registered',
     // });
 
     return {
