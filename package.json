@@ -22,7 +22,7 @@
   "dependencies": {
     "@apollo/server": "^4.11.3",
     "@as-integrations/express5": "^1.1.2",
-    "@bts-soft/core": "^1.8.4",
+    "@bts-soft/core": "^1.8.5",
     "@nestjs-modules/mailer": "^2.0.2",
     "@nestjs/apollo": "^13.1.0",
     "@nestjs/bullmq": "^11.0.4",

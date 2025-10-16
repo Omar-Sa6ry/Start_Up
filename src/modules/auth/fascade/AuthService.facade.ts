@@ -69,9 +69,9 @@ export class AuthServiceFacade {
     user.telegramLinkToken = telegramLinkToken;
     await this.userRepo.save(user);
 
-    await this.notificationService.send(ChannelType.TELEGRAM, {
-      recipientId: '123456789',
-      body: 'You login successfully!',
+    this.notificationService.send(ChannelType.WHATSAPP, {
+      recipientId: createUserDto.whatsapp,
+      body: 'You registered successfully in the App',
     });
 
     return {
@@ -106,6 +106,11 @@ export class AuthServiceFacade {
 
     user.data.fcmToken = fcmToken;
     this.userRepo.save(user.data);
+
+    this.notificationService.send(ChannelType.TELEGRAM, {
+      recipientId: user.data.whatsapp,
+      body: 'You login successfully!',
+    });
 
     this.redisService.set(`user:${user.data.id}`, user);
     return {
