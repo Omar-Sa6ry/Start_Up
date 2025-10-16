@@ -84,6 +84,11 @@ export class AuthServiceFacade {
     //   body: 'new account is registered',
     // });
 
+    // this.notificationService.send(ChannelType.TEAMS, {
+    //   recipientId: 'ignored',
+    //   body: 'new account is registered',
+    // });
+
     return {
       data: {
         user,
