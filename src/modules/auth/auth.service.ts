@@ -5,13 +5,13 @@ import { User } from 'src/modules/users/entity/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { AuthResponse } from './dto/AuthRes.dto';
 import { MoreThan, Repository } from 'typeorm';
-import { SendEmailService } from 'src/common/queues/email/sendemail.service';
 import { Role } from 'src/common/constant/enum.constant';
 import { PasswordResetLinkBuilder } from './builder/PasswordResetLink.builder';
 import { UserResponse } from '../users/dto/UserResponse.dto';
 import { ResetPasswordDto } from './inputs/ResetPassword.dto';
 import { PasswordServiceAdapter } from './adapter/password.adapter';
 import { ChangePasswordDto } from './inputs/ChangePassword.dto';
+import { NotificationService, RedisService } from '@bts-soft/core';
 import { IPasswordStrategy } from './interfaces/IPassword.interface';
 import { SendResetPasswordEmailCommand } from './command/auth.command';
 import {
@@ -19,7 +19,6 @@ import {
   InitialResetState,
   PasswordResetContext,
 } from './state/auth.state';
-import { RedisService } from '@bts-soft/core';
 
 @Injectable()
 export class AuthService {
@@ -29,7 +28,7 @@ export class AuthService {
     private readonly i18n: I18nService,
     private readonly userService: UserService,
     private readonly redisService: RedisService,
-    private readonly emailService: SendEmailService,
+    private readonly emailService: NotificationService,
     @InjectRepository(User) private readonly userRepo: Repository<User>,
   ) {
     this.passwordStrategy = new PasswordServiceAdapter();

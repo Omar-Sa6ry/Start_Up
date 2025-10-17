@@ -2,7 +2,6 @@ import { Module, OnModuleInit } from '@nestjs/common';
 import { InjectRepository, TypeOrmModule } from '@nestjs/typeorm';
 import { UserService } from './users.service';
 import { UserResolver } from './users.resolver';
-import { EmailModule } from 'src/common/queues/email/email.module';
 import { NotificationsResolver } from '../notifications/notifications.resolver';
 import { Repository } from 'typeorm';
 import { UserResponse } from './dto/UserResponse.dto';
@@ -17,12 +16,7 @@ import {
 } from '@bts-soft/core';
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([User]),
-    EmailModule,
-    RedisModule,
-    TelegramModule,
-  ],
+  imports: [TypeOrmModule.forFeature([User]), RedisModule, TelegramModule],
   providers: [
     UserService,
     UserResolver,
@@ -43,8 +37,6 @@ export class UserModule implements OnModuleInit {
     this.telegramService.setUserRepository(this.userRepo);
     this.telegramService.setUserResponseClass(UserResponse);
     this.telegramService.setUserResponseClass(NotificationResponse);
-
-
 
     console.log('TelegramService configured with User Repository.');
   }

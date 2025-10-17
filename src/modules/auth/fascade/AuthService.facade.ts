@@ -10,7 +10,6 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreateUserDto } from '../inputs/CreateUserData.dto';
 import { SendWelcomeEmailCommand } from '../command/auth.command';
-import { SendEmailService } from 'src/common/queues/email/sendemail.service';
 import { Role } from 'src/common/constant/enum.constant';
 import { PasswordValidator, RoleValidator } from '../chain/auth.chain';
 import { PasswordServiceAdapter } from '../adapter/password.adapter';
@@ -36,7 +35,6 @@ export class AuthServiceFacade {
     private readonly passwordAdapter: PasswordServiceAdapter,
     private readonly redisService: RedisService,
     private readonly uploadService: UploadService,
-    private readonly emailService: SendEmailService,
     private readonly telegramService: TelegramService,
     private readonly notificationService: NotificationService,
     @InjectRepository(User) private readonly userRepo: Repository<User>,
@@ -54,7 +52,7 @@ export class AuthServiceFacade {
     this.redisService.set(`user:email:${user.email}`, user);
 
     const emailCommand = new SendWelcomeEmailCommand(
-      this.emailService,
+      this.notificationService,
       user.email,
     );
     emailCommand.execute();
