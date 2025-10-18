@@ -22,7 +22,7 @@
   "dependencies": {
     "@apollo/server": "^4.11.3",
     "@as-integrations/express5": "^1.1.2",
-    "@bts-soft/core": "^1.8.9",
+    "@bts-soft/core": "^1.9.2",
     "@nestjs-modules/mailer": "^2.0.2",
     "@nestjs/apollo": "^13.1.0",
     "@nestjs/bullmq": "^11.0.4",
@@ -49,7 +49,6 @@
     "cloudinary": "^2.5.1",
     "cron": "^4.3.0",
     "dataloader": "^2.2.3",
-    "firebase-admin": "^13.1.0",
     "graphql": "^16.10.0",
     "graphql-depth-limit": "^1.1.0",
     "graphql-query-complexity": "^1.1.0",

@@ -21,8 +21,8 @@ import {
   RedisService,
   UploadService,
   ChannelType,
+  NotificationService,
 } from '@bts-soft/core';
-import { NotificationService } from '@bts-soft/notifications';
 
 @Injectable()
 export class AuthServiceFacade {
@@ -66,6 +66,12 @@ export class AuthServiceFacade {
 
     user.telegramLinkToken = telegramLinkToken;
     await this.userRepo.save(user);
+
+    this.notificationService.send(ChannelType.FIREBASE_FCM, {
+      recipientId: createUserDto.fcmToken,
+      subject: `welcome ${user.firstName}!`,
+      body: 'You registered successfully in the App',
+    });
 
     // this.notificationService.send(ChannelType.WHATSAPP, {
     //   recipientId: createUserDto.whatsapp,
@@ -178,7 +184,10 @@ export class AuthServiceFacade {
     if (createUserDto.image)
       avatar = await this.handleAvatarUpload(createUserDto.image);
 
-    const user = await this.userRepo.create({ ...createUserDto, password });
+    const user = await this.userRepo.create({
+      ...createUserDto,
+      password,
+    });
     await this.userRepo.save(user);
 
     // first account is admin
